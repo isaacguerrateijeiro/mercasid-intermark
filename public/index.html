@@ -2,7 +2,13 @@
 <html lang="es">
 <head>
 <meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+<meta name="apple-mobile-web-app-title" content="MercaSID">
+<meta name="mobile-web-app-capable" content="yes">
+<meta name="theme-color" content="#1B4E8F">
+<meta name="format-detection" content="telephone=no">
 <title>MercaSID · Canal Digital B2C — Demo App</title>
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
@@ -1417,15 +1423,340 @@ html, body {
   .scenarios { flex-direction: row; flex-wrap: wrap; }
   .scenario-btn { flex: 1 1 calc(50% - 4px); min-width: 140px; }
 }
-@media (max-width: 480px) {
-  .stage { padding: 0; gap: 0; }
-  .brief, .notes { padding: 16px; }
-  .phone {
-    width: 100%; max-width: 380px;
-    height: 100vh; max-height: 800px;
-    border-radius: 0; padding: 0; box-shadow: none;
+
+/* ============================================================
+   EXPERIENCIA MÓVIL NATIVA (≤ 768px)
+   - Fullscreen sin marco de teléfono
+   - Brief y Notes ocultos
+   - Safe areas para notch/dynamic island
+   - Sin zoom en inputs (font-size 16px+)
+   - FAB de navegación de flujos
+   ============================================================ */
+@media (max-width: 768px) {
+  /* Evitar overscroll y bounce en iOS */
+  html, body {
+    width: 100%;
+    height: 100%;
+    overflow: hidden;
+    position: fixed;
+    overscroll-behavior: none;
+    -webkit-overflow-scrolling: touch;
+    -webkit-tap-highlight-color: transparent;
+    -webkit-user-select: none;
+    user-select: none;
+    background: var(--white);
   }
-  .phone-screen { border-radius: 0; }
+  /* Inputs sí se pueden seleccionar */
+  input, textarea, [contenteditable] {
+    -webkit-user-select: text;
+    user-select: text;
+  }
+  /* Anti-zoom de Safari: cualquier input ≥16px */
+  input, textarea, select, button {
+    font-size: 16px !important;
+  }
+
+  /* Ocultar paneles desktop */
+  .brief, .notes {
+    display: none !important;
+  }
+
+  /* Stage ocupa todo */
+  .stage {
+    display: block;
+    padding: 0;
+    margin: 0;
+    width: 100vw;
+    height: 100vh;
+    height: 100dvh;
+    background: var(--white);
+  }
+  .phone-wrap {
+    padding: 0;
+    width: 100%;
+    height: 100%;
+  }
+
+  /* Teléfono sin marco, fullscreen */
+  .phone {
+    width: 100vw;
+    height: 100vh;
+    height: 100dvh;
+    max-width: none;
+    max-height: none;
+    border-radius: 0;
+    padding: 0;
+    box-shadow: none;
+    background: var(--white);
+  }
+  .phone-screen {
+    width: 100%;
+    height: 100%;
+    border-radius: 0;
+    background: var(--white);
+  }
+  .screens {
+    border-radius: 0;
+  }
+  .screen {
+    border-radius: 0;
+  }
+
+  /* Dynamic island del demo se oculta — usamos la del dispositivo real */
+  .dynamic-island {
+    display: none;
+  }
+
+  /* Status bar del demo: usar safe area real */
+  .status-bar {
+    padding-top: env(safe-area-inset-top, 16px);
+    padding-left: max(28px, env(safe-area-inset-left));
+    padding-right: max(28px, env(safe-area-inset-right));
+    height: auto;
+    min-height: calc(env(safe-area-inset-top, 16px) + 38px);
+  }
+
+  /* Bottom nav: respetar safe area inferior */
+  .bottom-nav {
+    padding-bottom: calc(8px + env(safe-area-inset-bottom, 0px)) !important;
+    padding-left: env(safe-area-inset-left);
+    padding-right: env(safe-area-inset-right);
+  }
+
+  /* CTA bottom: respetar safe area */
+  .cta-bottom {
+    padding-bottom: calc(16px + env(safe-area-inset-bottom, 0px)) !important;
+  }
+
+  /* FAB carrito flotante: subirlo por la safe area */
+  .cart-fab {
+    bottom: calc(80px + env(safe-area-inset-bottom, 0px)) !important;
+  }
+
+  /* Flow menu FAB: igual altura que el cart FAB (encima del bottom nav) */
+  .flow-menu-fab {
+    display: flex !important;
+    bottom: calc(78px + env(safe-area-inset-bottom, 0px)) !important;
+    left: 16px !important;
+  }
+  /* En pantallas sin bottom-nav (onboard, cart, checkout, confirm, product, item),
+     hay un CTA bottom o nada. Movemos FABs por encima del CTA. */
+  body[data-fullscreen="true"] .flow-menu-fab,
+  body[data-fullscreen="true"] .cart-fab {
+    bottom: calc(96px + env(safe-area-inset-bottom, 0px)) !important;
+  }
+  /* En la pantalla de confirmación y onboard no hay CTA grande,
+     pero como tienen botón inferior, mantenemos altura razonable */
+  body[data-fullscreen="true"][data-screen="confirm"] .flow-menu-fab {
+    bottom: calc(20px + env(safe-area-inset-bottom, 0px)) !important;
+  }
+
+  /* Toast respeta safe area top */
+  .toast {
+    top: calc(env(safe-area-inset-top, 16px) + 16px) !important;
+  }
+
+  /* Mejor scroll fluido */
+  .screen-content {
+    -webkit-overflow-scrolling: touch;
+    overscroll-behavior: contain;
+  }
+}
+
+/* En desktop, ocultar el flow-menu FAB y la bottom sheet */
+@media (min-width: 769px) {
+  .flow-menu-fab { display: none !important; }
+  .flow-menu-sheet, .flow-menu-backdrop { display: none !important; }
+}
+
+/* ============================================================
+   FLOW MENU (bottom sheet móvil con índice de flujos del demo)
+   ============================================================ */
+.flow-menu-fab {
+  display: none;
+  position: fixed;
+  bottom: 20px;
+  left: 20px;
+  width: 52px;
+  height: 52px;
+  border-radius: 50%;
+  background: linear-gradient(135deg, var(--merca-blue) 0%, #2563D6 100%);
+  color: white;
+  border: none;
+  box-shadow: 0 10px 28px rgba(27, 78, 143, 0.45), 0 4px 12px rgba(27, 78, 143, 0.3);
+  z-index: 998;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+  transition: transform 0.2s, box-shadow 0.2s;
+  -webkit-tap-highlight-color: transparent;
+}
+.flow-menu-fab:active {
+  transform: scale(0.94);
+}
+.flow-menu-fab svg {
+  width: 24px;
+  height: 24px;
+  stroke: white;
+  fill: none;
+  stroke-width: 2.2;
+}
+.flow-menu-fab .flow-fab-badge {
+  position: absolute;
+  top: -2px;
+  right: -2px;
+  background: var(--merca-green);
+  color: white;
+  font-size: 10px;
+  font-weight: 700;
+  width: 18px;
+  height: 18px;
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  border: 2px solid var(--white);
+}
+
+/* Backdrop */
+.flow-menu-backdrop {
+  position: fixed;
+  inset: 0;
+  background: rgba(15, 23, 42, 0.55);
+  backdrop-filter: blur(4px);
+  -webkit-backdrop-filter: blur(4px);
+  z-index: 999;
+  opacity: 0;
+  pointer-events: none;
+  transition: opacity 0.3s;
+}
+.flow-menu-backdrop.open {
+  opacity: 1;
+  pointer-events: auto;
+}
+
+/* Bottom sheet */
+.flow-menu-sheet {
+  position: fixed;
+  bottom: 0;
+  left: 0;
+  right: 0;
+  background: var(--white);
+  border-top-left-radius: 24px;
+  border-top-right-radius: 24px;
+  box-shadow: 0 -10px 40px rgba(0, 0, 0, 0.18);
+  z-index: 1000;
+  transform: translateY(100%);
+  transition: transform 0.32s cubic-bezier(0.32, 0.72, 0, 1);
+  max-height: 85vh;
+  display: flex;
+  flex-direction: column;
+  padding-bottom: env(safe-area-inset-bottom, 0px);
+}
+.flow-menu-sheet.open {
+  transform: translateY(0);
+}
+.flow-menu-handle {
+  width: 40px;
+  height: 4px;
+  background: #D8DEE8;
+  border-radius: 2px;
+  margin: 10px auto 6px;
+  flex-shrink: 0;
+}
+.flow-menu-header {
+  padding: 8px 22px 14px;
+  border-bottom: 1px solid var(--border);
+  flex-shrink: 0;
+}
+.flow-menu-header h3 {
+  font-size: 18px;
+  font-weight: 700;
+  color: var(--text);
+  margin: 0 0 2px 0;
+}
+.flow-menu-header p {
+  font-size: 13px;
+  color: var(--text-3);
+  margin: 0;
+}
+.flow-menu-list {
+  flex: 1;
+  overflow-y: auto;
+  -webkit-overflow-scrolling: touch;
+  padding: 8px 14px 24px;
+}
+.flow-menu-item {
+  display: flex;
+  align-items: center;
+  gap: 14px;
+  padding: 14px 12px;
+  border-radius: 14px;
+  cursor: pointer;
+  transition: background 0.15s;
+  -webkit-tap-highlight-color: transparent;
+  border: none;
+  background: transparent;
+  width: 100%;
+  text-align: left;
+}
+.flow-menu-item:active {
+  background: var(--gray-50);
+}
+.flow-menu-item.active {
+  background: linear-gradient(135deg, rgba(27, 78, 143, 0.08) 0%, rgba(31, 166, 99, 0.05) 100%);
+}
+.flow-menu-icon {
+  width: 44px;
+  height: 44px;
+  border-radius: 12px;
+  background: linear-gradient(135deg, var(--gray-100) 0%, var(--gray-50) 100%);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex-shrink: 0;
+  color: var(--merca-blue);
+}
+.flow-menu-item.active .flow-menu-icon {
+  background: linear-gradient(135deg, var(--merca-blue) 0%, #2563D6 100%);
+  color: white;
+}
+.flow-menu-icon svg {
+  width: 20px;
+  height: 20px;
+  stroke: currentColor;
+  fill: none;
+  stroke-width: 2;
+}
+.flow-menu-text {
+  flex: 1;
+  min-width: 0;
+}
+.flow-menu-text h4 {
+  font-size: 15px;
+  font-weight: 600;
+  color: var(--text);
+  margin: 0 0 2px 0;
+}
+.flow-menu-text p {
+  font-size: 12px;
+  color: var(--text-3);
+  margin: 0;
+  line-height: 1.35;
+}
+.flow-menu-item.active .flow-menu-text h4 {
+  color: var(--merca-blue);
+}
+.flow-menu-chevron {
+  color: var(--text-3);
+  flex-shrink: 0;
+}
+.flow-menu-chevron svg {
+  width: 18px;
+  height: 18px;
+  stroke: currentColor;
+  fill: none;
+  stroke-width: 2;
 }
 
 /* SVG icons (lucide-style strokes) — sizing controlado siempre */
@@ -2293,7 +2624,7 @@ svg:not([width]):not([height]) { max-width: 100%; max-height: 100%; }
     </button>
 <button class="scenario-btn" onclick="show('home', this)">
       <span class="scenario-num">02</span>
-      <span>Home — Dashboard</span>
+      <span>Home</span>
     </button>
 <button class="scenario-btn" onclick="show('catalog', this)">
       <span class="scenario-num">03</span>
@@ -2309,7 +2640,7 @@ svg:not([width]):not([height]) { max-width: 100%; max-height: 100%; }
     </button>
 <button class="scenario-btn" onclick="show('cart', this)">
       <span class="scenario-num">06</span>
-      <span>Carrito de compra</span>
+      <span>Carrito</span>
     </button>
 <button class="scenario-btn" onclick="show('checkout1', this)">
       <span class="scenario-num">07</span>
@@ -2333,7 +2664,7 @@ svg:not([width]):not([height]) { max-width: 100%; max-height: 100%; }
     </button>
 <button class="scenario-btn" onclick="show('loyalty', this)">
       <span class="scenario-num">12</span>
-      <span>MercaClub · Loyalty</span>
+      <span>MercaClub Loyalty</span>
     </button>
 <button class="scenario-btn" onclick="show('promos', this)">
       <span class="scenario-num">13</span>
@@ -3851,6 +4182,139 @@ svg:not([width]):not([height]) { max-width: 100%; max-height: 100%; }
 </div>
 <div id="toast" class="toast"></div>
 
+<!-- FAB de navegación de flujos (solo móvil) -->
+<button class="flow-menu-fab" id="flow-menu-fab" onclick="openFlowMenu()" aria-label="Navegar por los flujos del demo">
+  <svg class="lucide" viewBox="0 0 24 24"><polygon points="12 2 2 7 12 12 22 7 12 2"/><polyline points="2 17 12 22 22 17"/><polyline points="2 12 12 17 22 12"/></svg>
+  <span class="flow-fab-badge">14</span>
+</button>
+
+<!-- Backdrop -->
+<div class="flow-menu-backdrop" id="flow-menu-backdrop" onclick="closeFlowMenu()"></div>
+
+<!-- Bottom sheet con índice de flujos -->
+<div class="flow-menu-sheet" id="flow-menu-sheet" role="dialog" aria-labelledby="flow-menu-title">
+  <div class="flow-menu-handle"></div>
+  <div class="flow-menu-header">
+    <h3 id="flow-menu-title">Flujos del demo</h3>
+    <p>Navega por las 14 pantallas que componen la experiencia</p>
+  </div>
+  <div class="flow-menu-list">
+    <button class="flow-menu-item" data-screen="onboard" onclick="selectFlow('onboard')">
+      <div class="flow-menu-icon"><svg class="lucide" viewBox="0 0 24 24"><path d="M12 3v18"/><path d="M3 12h18"/><path d="m5.6 5.6 12.8 12.8"/><path d="m18.4 5.6-12.8 12.8"/></svg></div>
+      <div class="flow-menu-text">
+        <h4>Onboarding</h4>
+        <p>Bienvenida en 3 pasos</p>
+      </div>
+      <div class="flow-menu-chevron"><svg class="lucide" viewBox="0 0 24 24"><polyline points="9 18 15 12 9 6"/></svg></div>
+    </button>
+<button class="flow-menu-item" data-screen="home" onclick="selectFlow('home')">
+      <div class="flow-menu-icon"><svg class="lucide" viewBox="0 0 24 24"><path d="m3 9 9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"/><polyline points="9 22 9 12 15 12 15 22"/></svg></div>
+      <div class="flow-menu-text">
+        <h4>Home</h4>
+        <p>Dashboard con packs destacados</p>
+      </div>
+      <div class="flow-menu-chevron"><svg class="lucide" viewBox="0 0 24 24"><polyline points="9 18 15 12 9 6"/></svg></div>
+    </button>
+<button class="flow-menu-item" data-screen="catalog" onclick="selectFlow('catalog')">
+      <div class="flow-menu-icon"><svg class="lucide" viewBox="0 0 24 24"><rect x="3" y="3" width="7" height="7"/><rect x="14" y="3" width="7" height="7"/><rect x="14" y="14" width="7" height="7"/><rect x="3" y="14" width="7" height="7"/></svg></div>
+      <div class="flow-menu-text">
+        <h4>Catálogo</h4>
+        <p>Packs y productos individuales</p>
+      </div>
+      <div class="flow-menu-chevron"><svg class="lucide" viewBox="0 0 24 24"><polyline points="9 18 15 12 9 6"/></svg></div>
+    </button>
+<button class="flow-menu-item" data-screen="product" onclick="selectFlow('product')">
+      <div class="flow-menu-icon"><svg class="lucide" viewBox="0 0 24 24"><path d="M16.5 9.4 7.55 4.24"/><path d="M21 16V8a2 2 0 0 0-1-1.73l-7-4a2 2 0 0 0-2 0l-7 4A2 2 0 0 0 3 8v8a2 2 0 0 0 1 1.73l7 4a2 2 0 0 0 2 0l7-4A2 2 0 0 0 21 16z"/><polyline points="3.27 6.96 12 12.01 20.73 6.96"/><line x1="12" y1="22.08" x2="12" y2="12"/></svg></div>
+      <div class="flow-menu-text">
+        <h4>Detalle de pack</h4>
+        <p>Personalizar items y extras</p>
+      </div>
+      <div class="flow-menu-chevron"><svg class="lucide" viewBox="0 0 24 24"><polyline points="9 18 15 12 9 6"/></svg></div>
+    </button>
+<button class="flow-menu-item" data-screen="item" onclick="selectFlow('item')">
+      <div class="flow-menu-icon"><svg class="lucide" viewBox="0 0 24 24"><path d="M20.59 13.41 13.42 20.58a2 2 0 0 1-2.83 0L2 12V2h10l8.59 8.59a2 2 0 0 1 0 2.82z"/><line x1="7" y1="7" x2="7.01" y2="7"/></svg></div>
+      <div class="flow-menu-text">
+        <h4>Detalle de producto</h4>
+        <p>Ficha individual de un artículo</p>
+      </div>
+      <div class="flow-menu-chevron"><svg class="lucide" viewBox="0 0 24 24"><polyline points="9 18 15 12 9 6"/></svg></div>
+    </button>
+<button class="flow-menu-item" data-screen="cart" onclick="selectFlow('cart')">
+      <div class="flow-menu-icon"><svg class="lucide" viewBox="0 0 24 24"><path d="M6 2 3 6v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2V6l-3-4Z"/><path d="M3 6h18"/><path d="M16 10a4 4 0 0 1-8 0"/></svg></div>
+      <div class="flow-menu-text">
+        <h4>Carrito</h4>
+        <p>Resumen antes del pago</p>
+      </div>
+      <div class="flow-menu-chevron"><svg class="lucide" viewBox="0 0 24 24"><polyline points="9 18 15 12 9 6"/></svg></div>
+    </button>
+<button class="flow-menu-item" data-screen="checkout1" onclick="selectFlow('checkout1')">
+      <div class="flow-menu-icon"><svg class="lucide" viewBox="0 0 24 24"><path d="M10 17h4V5H2v12h3"/><path d="M20 17h2v-3.34a4 4 0 0 0-1.17-2.83L19 9h-5"/><path d="M14 17h1"/><circle cx="7.5" cy="17.5" r="2.5"/><circle cx="17.5" cy="17.5" r="2.5"/></svg></div>
+      <div class="flow-menu-text">
+        <h4>Checkout · Datos</h4>
+        <p>Dirección e información</p>
+      </div>
+      <div class="flow-menu-chevron"><svg class="lucide" viewBox="0 0 24 24"><polyline points="9 18 15 12 9 6"/></svg></div>
+    </button>
+<button class="flow-menu-item" data-screen="checkout2" onclick="selectFlow('checkout2')">
+      <div class="flow-menu-icon"><svg class="lucide" viewBox="0 0 24 24"><rect x="2" y="5" width="20" height="14" rx="2"/><line x1="2" y1="10" x2="22" y2="10"/></svg></div>
+      <div class="flow-menu-text">
+        <h4>Checkout · Pago</h4>
+        <p>Selección de método de pago</p>
+      </div>
+      <div class="flow-menu-chevron"><svg class="lucide" viewBox="0 0 24 24"><polyline points="9 18 15 12 9 6"/></svg></div>
+    </button>
+<button class="flow-menu-item" data-screen="confirm" onclick="selectFlow('confirm')">
+      <div class="flow-menu-icon"><svg class="lucide" viewBox="0 0 24 24"><path d="M22 11.08V12a10 10 0 1 1-5.93-9.14"/><polyline points="22 4 12 14.01 9 11.01"/></svg></div>
+      <div class="flow-menu-text">
+        <h4>Confirmación</h4>
+        <p>Pedido confirmado</p>
+      </div>
+      <div class="flow-menu-chevron"><svg class="lucide" viewBox="0 0 24 24"><polyline points="9 18 15 12 9 6"/></svg></div>
+    </button>
+<button class="flow-menu-item" data-screen="subs" onclick="selectFlow('subs')">
+      <div class="flow-menu-icon"><svg class="lucide" viewBox="0 0 24 24"><path d="m17 2 4 4-4 4"/><path d="M3 11v-1a4 4 0 0 1 4-4h14"/><path d="m7 22-4-4 4-4"/><path d="M21 13v1a4 4 0 0 1-4 4H3"/></svg></div>
+      <div class="flow-menu-text">
+        <h4>Mis suscripciones</h4>
+        <p>Activas, pausadas y próximas</p>
+      </div>
+      <div class="flow-menu-chevron"><svg class="lucide" viewBox="0 0 24 24"><polyline points="9 18 15 12 9 6"/></svg></div>
+    </button>
+<button class="flow-menu-item" data-screen="manage" onclick="selectFlow('manage')">
+      <div class="flow-menu-icon"><svg class="lucide" viewBox="0 0 24 24"><circle cx="12" cy="12" r="3"/><path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 0 1 0 2.83 2 2 0 0 1-2.83 0l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-2 2 2 2 0 0 1-2-2v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 0 1-2.83 0 2 2 0 0 1 0-2.83l.06-.06a1.65 1.65 0 0 0 .33-1.82 1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1-2-2 2 2 0 0 1 2-2h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 0 1 0-2.83 2 2 0 0 1 2.83 0l.06.06a1.65 1.65 0 0 0 1.82.33H9a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 2-2 2 2 0 0 1 2 2v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 0 1 2.83 0 2 2 0 0 1 0 2.83l-.06.06a1.65 1.65 0 0 0-.33 1.82V9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 2 2 2 2 0 0 1-2 2h-.09a1.65 1.65 0 0 0-1.51 1z"/></svg></div>
+      <div class="flow-menu-text">
+        <h4>Gestionar suscripción</h4>
+        <p>Frecuencia, dirección, pago</p>
+      </div>
+      <div class="flow-menu-chevron"><svg class="lucide" viewBox="0 0 24 24"><polyline points="9 18 15 12 9 6"/></svg></div>
+    </button>
+<button class="flow-menu-item" data-screen="loyalty" onclick="selectFlow('loyalty')">
+      <div class="flow-menu-icon"><svg class="lucide" viewBox="0 0 24 24"><polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2"/></svg></div>
+      <div class="flow-menu-text">
+        <h4>MercaClub Loyalty</h4>
+        <p>Puntos, niveles y recompensas</p>
+      </div>
+      <div class="flow-menu-chevron"><svg class="lucide" viewBox="0 0 24 24"><polyline points="9 18 15 12 9 6"/></svg></div>
+    </button>
+<button class="flow-menu-item" data-screen="promos" onclick="selectFlow('promos')">
+      <div class="flow-menu-icon"><svg class="lucide" viewBox="0 0 24 24"><polyline points="20 12 20 22 4 22 4 12"/><rect x="2" y="7" width="20" height="5"/><line x1="12" y1="22" x2="12" y2="7"/><path d="M12 7H7.5a2.5 2.5 0 0 1 0-5C11 2 12 7 12 7z"/><path d="M12 7h4.5a2.5 2.5 0 0 0 0-5C13 2 12 7 12 7z"/></svg></div>
+      <div class="flow-menu-text">
+        <h4>Promociones</h4>
+        <p>Cupones y ofertas activas</p>
+      </div>
+      <div class="flow-menu-chevron"><svg class="lucide" viewBox="0 0 24 24"><polyline points="9 18 15 12 9 6"/></svg></div>
+    </button>
+<button class="flow-menu-item" data-screen="profile" onclick="selectFlow('profile')">
+      <div class="flow-menu-icon"><svg class="lucide" viewBox="0 0 24 24"><path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"/><circle cx="12" cy="7" r="4"/></svg></div>
+      <div class="flow-menu-text">
+        <h4>Perfil</h4>
+        <p>Datos y preferencias</p>
+      </div>
+      <div class="flow-menu-chevron"><svg class="lucide" viewBox="0 0 24 24"><polyline points="9 18 15 12 9 6"/></svg></div>
+    </button>
+  </div>
+</div>
+
+
 <script>
 // ====== DATOS ======
 const PACK_INFO = {
@@ -3972,6 +4436,10 @@ function show(screenId, btn) {
   if (fab) {
     fab.style.display = FAB_HIDDEN_SCREENS.includes(screenId) ? 'none' : 'flex';
   }
+  // Marcar pantallas sin bottom-nav para posicionar FABs móviles correctamente
+  const SCREENS_WITHOUT_BOTTOM_NAV = ['onboard', 'cart', 'checkout1', 'checkout2', 'confirm', 'product', 'item', 'manage'];
+  document.body.dataset.fullscreen = SCREENS_WITHOUT_BOTTOM_NAV.includes(screenId) ? 'true' : 'false';
+  document.body.dataset.screen = screenId;
   // Refresh cart al entrar
   if (screenId === 'cart') renderCart();
   // NOTA: no llamamos a resetPackEditState aquí; openPack() es quien gestiona la pantalla
@@ -5458,6 +5926,101 @@ function _prefillPack(slug) {
     window.show = origShow;
   }
 }
+
+// ====== FLOW MENU (bottom sheet móvil) ======
+function openFlowMenu() {
+  const sheet = document.getElementById('flow-menu-sheet');
+  const backdrop = document.getElementById('flow-menu-backdrop');
+  if (!sheet || !backdrop) return;
+  // Marcar como activa la pantalla actual
+  highlightCurrentFlow();
+  sheet.classList.add('open');
+  backdrop.classList.add('open');
+  // Vibración háptica si está disponible (feedback nativo)
+  if (navigator.vibrate) navigator.vibrate(8);
+}
+
+function closeFlowMenu() {
+  const sheet = document.getElementById('flow-menu-sheet');
+  const backdrop = document.getElementById('flow-menu-backdrop');
+  if (!sheet || !backdrop) return;
+  sheet.classList.remove('open');
+  backdrop.classList.remove('open');
+}
+
+function selectFlow(slug) {
+  closeFlowMenu();
+  // Pequeño delay para que se vea la animación de cierre
+  setTimeout(() => {
+    if (slug === 'product') {
+      openPack(currentPackSlug || 'esencial');
+    } else if (slug === 'item') {
+      openItem(currentItemSlug || 'mazola');
+    } else {
+      show(slug);
+    }
+  }, 180);
+}
+
+function highlightCurrentFlow() {
+  // Detectar pantalla activa
+  const activeScreen = document.querySelector('.screen.active');
+  if (!activeScreen) return;
+  const slug = activeScreen.id.replace('screen-', '');
+  document.querySelectorAll('.flow-menu-item').forEach(el => {
+    if (el.dataset.screen === slug) {
+      el.classList.add('active');
+      // Scroll hacia el item activo dentro del bottom sheet
+      setTimeout(() => el.scrollIntoView({block: 'nearest', behavior: 'smooth'}), 100);
+    } else {
+      el.classList.remove('active');
+    }
+  });
+}
+
+// Cerrar bottom sheet con ESC
+document.addEventListener('keydown', (e) => {
+  if (e.key === 'Escape') closeFlowMenu();
+});
+
+// Swipe-down to close (gesture nativo)
+(function setupFlowMenuSwipe() {
+  let startY = 0;
+  let currentY = 0;
+  let dragging = false;
+  const sheet = () => document.getElementById('flow-menu-sheet');
+
+  document.addEventListener('touchstart', (e) => {
+    const s = sheet();
+    if (!s || !s.classList.contains('open')) return;
+    // Solo iniciar drag si el touch empezó en el header o handle
+    const target = e.target;
+    if (target.closest('.flow-menu-handle') || target.closest('.flow-menu-header')) {
+      startY = e.touches[0].clientY;
+      dragging = true;
+      s.style.transition = 'none';
+    }
+  }, {passive: true});
+
+  document.addEventListener('touchmove', (e) => {
+    if (!dragging) return;
+    currentY = e.touches[0].clientY;
+    const delta = Math.max(0, currentY - startY);
+    const s = sheet();
+    if (s) s.style.transform = `translateY(${delta}px)`;
+  }, {passive: true});
+
+  document.addEventListener('touchend', () => {
+    if (!dragging) return;
+    dragging = false;
+    const s = sheet();
+    if (!s) return;
+    s.style.transition = '';
+    s.style.transform = '';
+    const delta = currentY - startY;
+    if (delta > 80) closeFlowMenu();
+  });
+})();
 </script>
 
 
