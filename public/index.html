@@ -1507,13 +1507,9 @@ html, body {
     display: none;
   }
 
-  /* Status bar del demo: usar safe area real */
+  /* Status bar del demo: ocultar en mobile — el dispositivo real ya la muestra */
   .status-bar {
-    padding-top: env(safe-area-inset-top, 16px);
-    padding-left: max(28px, env(safe-area-inset-left));
-    padding-right: max(28px, env(safe-area-inset-right));
-    height: auto;
-    min-height: calc(env(safe-area-inset-top, 16px) + 38px);
+    display: none !important;
   }
 
   /* Bottom nav: respetar safe area inferior */
@@ -1560,7 +1556,24 @@ html, body {
   .screen-content {
     -webkit-overflow-scrolling: touch;
     overscroll-behavior: contain;
+    overflow-x: hidden;
   }
+
+  /* Fix cupón: evitar que input + botón se salgan del ancho en mobile */
+  .promo-input-wrap input {
+    min-width: 0;
+  }
+  .promo-input-wrap button {
+    flex-shrink: 0;
+    white-space: nowrap;
+    padding-left: 14px !important;
+    padding-right: 14px !important;
+  }
+}
+
+/* Carrito FAB: ocultar en onboarding (mobile y desktop — no es relevante aún) */
+body[data-screen="onboard"] .cart-fab {
+  display: none !important;
 }
 
 /* En desktop, ocultar el flow-menu FAB y la bottom sheet */
