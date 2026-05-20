@@ -5922,8 +5922,8 @@ function productSvg(slug) {
 // ====== INIT ======
 document.addEventListener('DOMContentLoaded', () => {
   updateCartBadge();
-  // Pre-cargar el pack esencial en SCREEN_PRODUCT sin navegar a él
-  // (la función openPack llama a show; usamos un truco para evitarlo)
+  document.body.dataset.screen = 'onboard';
+  document.body.dataset.fullscreen = 'true';
   _prefillPack('esencial');
 });
 
